@@ -3,14 +3,11 @@ package dev.doctor4t.trainmurdermystery.client.gui.screen.ingame;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -24,6 +21,7 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -156,16 +154,23 @@ public abstract class LimitedHandledScreen<T extends ScreenHandler> extends Scre
         if (this.handler.getCursorStack().isEmpty() && this.focusedSlot != null && this.focusedSlot.hasStack()) {
             ItemStack itemStack = this.focusedSlot.getStack();
 
-            List<Text> tooltipFromItem = this.getTooltipFromItem(itemStack);
-            int textWidth = this.textRenderer.getWidth(itemStack.getName().getString());
-            for (Text text : tooltipFromItem) {
+            List<Text> tooltips = this.getTooltipFromItem(itemStack);
+            List<Text> name = new ArrayList<>();
+            name.add(tooltips.getFirst());
+            tooltips.removeFirst();
+
+            int nameWidth = this.textRenderer.getWidth(itemStack.getName().getString());
+
+            int tooltipWidth = 0;
+            for (Text text : tooltips) {
                 int newWidth = this.textRenderer.getWidth(text.getString());
-                if (newWidth > textWidth) {
-                    textWidth = newWidth;
+                if (newWidth > tooltipWidth) {
+                    tooltipWidth = newWidth;
                 }
             }
 
-            context.drawTooltip(this.textRenderer, tooltipFromItem, itemStack.getTooltipData(), this.x + 76 - (textWidth / 2) , this.y + 50);
+            context.drawTooltip(this.textRenderer, name, itemStack.getTooltipData(), this.x + 76 - (nameWidth / 2), this.y - 2);
+            if (tooltipWidth > 0) context.drawTooltip(this.textRenderer, tooltips, itemStack.getTooltipData(), this.x + 76 - (tooltipWidth / 2), this.y + 50);
         }
     }
 

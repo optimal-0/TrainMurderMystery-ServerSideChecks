@@ -125,8 +125,6 @@ public class TrainMurderMysteryClient implements ClientModInitializer {
                     ItemCooldownManager.Entry knifeEntry = itemCooldownManager.entries.get(TrainMurderMysteryItems.KNIFE);
                     int timeLeft = knifeEntry.endTick -  itemCooldownManager.tick;
 
-                    System.out.println(timeLeft);
-
                     if (timeLeft > 0) {
                         int minutes = (int) Math.floor((double) timeLeft / 1200);
                         int seconds = (timeLeft - (minutes  * 1200)) / 20;
