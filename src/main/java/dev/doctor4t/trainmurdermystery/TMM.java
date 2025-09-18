@@ -51,7 +51,6 @@ public class TMM implements ModInitializer {
 }
 
 // TODO: Add tasks (2-3 hours)
-// TODO: Map reset system (1h)
 // TODO: Add lobby (1h)
 // TODO: Nicer starting phase + UI (2h)
 // TODO: System that remembers previous roles and allows cycling of roles (3h)

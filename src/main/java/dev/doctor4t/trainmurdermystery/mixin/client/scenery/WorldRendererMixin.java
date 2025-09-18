@@ -82,7 +82,7 @@ public abstract class WorldRendererMixin {
             float trainSpeed = TMMClient.getTrainSpeed(); // in kmh
             int chunkSize = 16;
             int tileWidth = 15 * chunkSize;
-            int height = 120;
+            int height = 116;
             int tileLength = 32 * chunkSize;
             int tileSize = tileLength * 3;
 

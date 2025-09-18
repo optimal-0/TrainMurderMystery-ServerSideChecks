@@ -1,24 +1,36 @@
 package dev.doctor4t.trainmurdermystery.game;
 
+import com.google.common.collect.Lists;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.cca.WorldGameComponent;
 import dev.doctor4t.trainmurdermystery.cca.WorldTrainComponent;
 import dev.doctor4t.trainmurdermystery.entity.PlayerBodyEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Clearable;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -125,6 +137,9 @@ public class TMMGameLoop {
         world.getServer().setDifficulty(Difficulty.PEACEFUL, true);
         world.setTimeOfDay(18000);
 
+        // reset train
+        resetTrain(world);
+
         List<ServerPlayerEntity> playerPool = new ArrayList<>(world.getPlayers().stream().filter(serverPlayerEntity -> !serverPlayerEntity.isInCreativeMode() && !serverPlayerEntity.isSpectator()).toList());
 
         // limit the game to 14 players, put players 15 to n in spectator mode
@@ -188,7 +203,7 @@ public class TMMGameLoop {
         for (int i = 0; i < playerPool.size(); i++) {
             ItemStack itemStack = new ItemStack(TMMItems.KEY);
             int roomNumber = (int) Math.floor((double) (i + 2) / 2);
-            itemStack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, component -> new LoreComponent(Text.literal("Room "+ roomNumber).getWithStyle(Style.EMPTY.withItalic(false).withColor(0xFF8C00))));
+            itemStack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, component -> new LoreComponent(Text.literal("Room " + roomNumber).getWithStyle(Style.EMPTY.withItalic(false).withColor(0xFF8C00))));
             ServerPlayerEntity player = playerPool.get(i);
             player.giveItemStack(itemStack);
 
@@ -243,6 +258,91 @@ public class TMMGameLoop {
 
     public static boolean isPlayerAliveAndSurvival(PlayerEntity player) {
         return player != null && !player.isSpectator() && !player.isCreative();
+    }
+
+    record BlockEntityInfo(NbtCompound nbt, ComponentMap components) {
+    }
+
+    record BlockInfo(BlockPos pos, BlockState state, @Nullable BlockEntityInfo blockEntityInfo) {
+    }
+
+    public static void resetTrain(ServerWorld serverWorld) {
+        BlockPos backupMinPos = BlockPos.ofFloored(TMMGameConstants.BACKUP_TRAIN_LOCATION.getMinPos());
+        BlockPos backupMaxPos = BlockPos.ofFloored(TMMGameConstants.BACKUP_TRAIN_LOCATION.getMaxPos());
+        BlockPos trainMinPos = BlockPos.ofFloored(TMMGameConstants.TRAIN_LOCATION.getMinPos());
+        BlockPos trainMaxPos = BlockPos.ofFloored(TMMGameConstants.TRAIN_LOCATION.getMaxPos());
+
+        BlockBox backupTrainBox = BlockBox.create(backupMinPos, backupMaxPos);
+        BlockBox trainBox = BlockBox.create(trainMinPos, trainMaxPos);
+
+        if (serverWorld.isRegionLoaded(backupMinPos, backupMaxPos) && serverWorld.isRegionLoaded(trainMinPos, trainMaxPos)) {
+            List<BlockInfo> list = Lists.newArrayList();
+            List<BlockInfo> list2 = Lists.newArrayList();
+            List<BlockInfo> list3 = Lists.newArrayList();
+            Deque<BlockPos> deque = Lists.newLinkedList();
+            BlockPos blockPos5 = new BlockPos(trainBox.getMinX() - backupTrainBox.getMinX(), trainBox.getMinY() - backupTrainBox.getMinY(), trainBox.getMinZ() - backupTrainBox.getMinZ());
+
+            for (int k = backupTrainBox.getMinZ(); k <= backupTrainBox.getMaxZ(); ++k) {
+                for (int l = backupTrainBox.getMinY(); l <= backupTrainBox.getMaxY(); ++l) {
+                    for (int m = backupTrainBox.getMinX(); m <= backupTrainBox.getMaxX(); ++m) {
+                        BlockPos blockPos6 = new BlockPos(m, l, k);
+                        BlockPos blockPos7 = blockPos6.add(blockPos5);
+                        CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(serverWorld, blockPos6, false);
+                        BlockState blockState = cachedBlockPosition.getBlockState();
+
+                        BlockEntity blockEntity = serverWorld.getBlockEntity(blockPos6);
+                        if (blockEntity != null) {
+                            BlockEntityInfo blockEntityInfo = new BlockEntityInfo(blockEntity.createComponentlessNbt(serverWorld.getServer().getRegistryManager()), blockEntity.getComponents());
+                            list2.add(new BlockInfo(blockPos7, blockState, blockEntityInfo));
+                            deque.addLast(blockPos6);
+                        } else if (!blockState.isOpaqueFullCube(serverWorld, blockPos6) && !blockState.isFullCube(serverWorld, blockPos6)) {
+                            list3.add(new BlockInfo(blockPos7, blockState, null));
+                            deque.addFirst(blockPos6);
+                        } else {
+                            list.add(new BlockInfo(blockPos7, blockState, null));
+                            deque.addLast(blockPos6);
+                        }
+                    }
+                }
+            }
+
+            List<BlockInfo> list4 = Lists.newArrayList();
+            list4.addAll(list);
+            list4.addAll(list2);
+            list4.addAll(list3);
+            List<BlockInfo> list5 = Lists.reverse(list4);
+
+            for (BlockInfo blockInfo : list5) {
+                BlockEntity blockEntity3 = serverWorld.getBlockEntity(blockInfo.pos);
+                Clearable.clear(blockEntity3);
+                serverWorld.setBlockState(blockInfo.pos, Blocks.BARRIER.getDefaultState(), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+            }
+
+            int mx = 0;
+
+            for (BlockInfo blockInfo2 : list4) {
+                if (serverWorld.setBlockState(blockInfo2.pos, blockInfo2.state, Block.NOTIFY_LISTENERS | Block.FORCE_STATE)) {
+                    ++mx;
+                }
+            }
+
+            for (BlockInfo blockInfo2 : list2) {
+                BlockEntity blockEntity4 = serverWorld.getBlockEntity(blockInfo2.pos);
+                if (blockInfo2.blockEntityInfo != null && blockEntity4 != null) {
+                    blockEntity4.readComponentlessNbt(blockInfo2.blockEntityInfo.nbt, serverWorld.getRegistryManager());
+                    blockEntity4.setComponents(blockInfo2.blockEntityInfo.components);
+                    blockEntity4.markDirty();
+                }
+
+                serverWorld.setBlockState(blockInfo2.pos, blockInfo2.state, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+            }
+
+            for (BlockInfo blockInfo2 : list5) {
+                serverWorld.updateNeighbors(blockInfo2.pos, blockInfo2.state.getBlock());
+            }
+
+            serverWorld.getBlockTickScheduler().scheduleTicks(serverWorld.getBlockTickScheduler(), backupTrainBox, blockPos5);
+        }
     }
 
     public enum WinStatus {
