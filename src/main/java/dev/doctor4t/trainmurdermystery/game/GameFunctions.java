@@ -263,8 +263,6 @@ public class GameFunctions {
                     }
             );
             serverPlayerEntity.giveItemStack(letter);
-
-            serverPlayerEntity.giveItemStack(new ItemStack(TMMItems.NOTE));
         }
 
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.ACTIVE);

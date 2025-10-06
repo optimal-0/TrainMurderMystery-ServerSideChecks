@@ -175,7 +175,6 @@ public class TMM implements ModInitializer {
 // TORECORD: 10s cooldown on the crowbar
 // TORECORD: Fix role weighting
 // TORECORD: Make killers have to kill all civilians
-// TORECORD: Notes for some / every civilian
 // TORECORD: Grenades kill killers
 // TORECORD: Get put in a vc group when dead
 // TORECORD: Ability to wake up players
