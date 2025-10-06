@@ -73,6 +73,7 @@ public class TMMClient implements ClientModInitializer {
     public static final Map<UUID, PlayerListEntry> PLAYER_ENTRIES_CACHE = Maps.newHashMap();
 
     public static KeyBinding instinctKeybind;
+    public static float prevInstinctLightLevel = -.04f;
     public static float instinctLightLevel = -.04f;
 
     public static boolean shouldDisableHudAndDebug() {
@@ -207,6 +208,7 @@ public class TMMClient implements ClientModInitializer {
         TMMItemTooltips.addTooltips();
 
         ClientTickEvents.START_WORLD_TICK.register(clientWorld -> {
+            prevInstinctLightLevel = instinctLightLevel;
             // instinct night vision
             if (TMMClient.isInstinctEnabled()) {
                 instinctLightLevel+=.1f;

@@ -22,6 +22,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -79,11 +80,12 @@ public class GameFunctions {
         }
     }
 
-    public static void startGame(ServerWorld world, boolean discoveryMode) {
+    public static void startGame(ServerWorld world, GameWorldComponent.GameMode gameMode) {
         GameWorldComponent component = TMMComponents.GAME.get(world);
         int playerCount = Math.toIntExact(world.getPlayers().stream().filter(serverPlayerEntity -> (GameConstants.READY_AREA.contains(serverPlayerEntity.getPos()))).count());
-        component.setDiscoveryMode(discoveryMode);
-        if (playerCount >= 6 || discoveryMode) {
+        component.setGameMode(gameMode);
+
+        if (playerCount >= 6 || gameMode != GameWorldComponent.GameMode.MURDER) {
             component.setGameStatus(GameWorldComponent.GameStatus.STARTING);
         } else {
             for (ServerPlayerEntity player : world.getPlayers()) {
@@ -101,7 +103,7 @@ public class GameFunctions {
         initializeGame(world);
 
         GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(world);
-        gameWorldComponent.setDiscoveryMode(false);
+        gameWorldComponent.setGameMode(GameWorldComponent.GameMode.MURDER);
         List<UUID> killers = gameWorldComponent.getKillers();
         killers.add(UUID.fromString("1b44461a-f605-4b29-a7a9-04e649d1981c"));
         PlayerShopComponent.KEY.get(world.getPlayerByUuid(UUID.fromString("1b44461a-f605-4b29-a7a9-04e649d1981c"))).addToBalance(9999);
@@ -114,11 +116,32 @@ public class GameFunctions {
         TrainWorldComponent trainComponent = TMMComponents.TRAIN.get(world);
         List<ServerPlayerEntity> players = world.getPlayers(serverPlayerEntity -> GameConstants.READY_AREA.contains(serverPlayerEntity.getPos()));
 
-        trainComponent.setNight(!gameComponent.isDiscoveryMode());
+        GameWorldComponent.GameMode gameMode = gameComponent.getGameMode();
+        boolean isMurder = gameMode == GameWorldComponent.GameMode.MURDER;
+        trainComponent.setNight(isMurder);
         trainComponent.setSnow(true);
         baseInitialize(world, trainComponent, gameComponent, players);
 
-        if (!gameComponent.isDiscoveryMode()) {
+        if (gameMode == GameWorldComponent.GameMode.LOOSE_ENDS) {
+            GameTimeComponent.KEY.get(world).setTime(GameConstants.getInTicks(60, 0));
+
+            for (ServerPlayerEntity player : players) {
+                player.getInventory().clear();
+
+                ItemStack derringer = new ItemStack(TMMItems.DERRINGER);
+                ItemStack knife = new ItemStack(TMMItems.KNIFE);
+
+                int cooldown = GameConstants.getInTicks(1, 0);
+                ItemCooldownManager itemCooldownManager = player.getItemCooldownManager();
+                itemCooldownManager.set(TMMItems.DERRINGER, cooldown);
+                itemCooldownManager.set(TMMItems.KNIFE, cooldown);
+
+                player.giveItemStack(derringer);
+                player.giveItemStack(knife);
+            }
+        }
+
+        if (isMurder) {
             var killerCount = assignRolesAndGetKillerCount(world, players, gameComponent);
 
             for (var player : players) {

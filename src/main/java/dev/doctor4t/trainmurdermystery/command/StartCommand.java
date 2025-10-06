@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -11,7 +12,7 @@ public class StartCommand {
                 CommandManager.literal("tmm:start")
                         .requires(source -> source.hasPermissionLevel(2))
                         .executes(context -> {
-                                    GameFunctions.startGame(context.getSource().getWorld(), false);
+                                    GameFunctions.startGame(context.getSource().getWorld(), GameWorldComponent.GameMode.MURDER);
                                     return 1;
                                 }
                         )

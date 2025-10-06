@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.block;
 
 import com.mojang.serialization.MapCodec;
 import dev.doctor4t.trainmurdermystery.block.entity.HornBlockEntity;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMBlockEntities;
@@ -65,7 +66,7 @@ public class HornBlock extends BlockWithEntity implements Waterloggable {
 
                 // start game
                 if (isOp && !TMMComponents.GAME.get(serverWorld).isRunning()) {
-                    GameFunctions.startGame(serverWorld, false);
+                    GameFunctions.startGame(serverWorld, GameWorldComponent.GameMode.MURDER);
                 }
 
                 hornBlockEntity.pull(1);

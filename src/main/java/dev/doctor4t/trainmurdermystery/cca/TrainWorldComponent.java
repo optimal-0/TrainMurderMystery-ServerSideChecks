@@ -93,7 +93,10 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
         tickTime();
 
         ServerWorld serverWorld = (ServerWorld) world;
-        if (this.isNight() && world.getTimeOfDay() != 18000) {
+        GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(world);
+        if (gameWorldComponent.getGameMode() == GameWorldComponent.GameMode.LOOSE_ENDS && gameWorldComponent.isRunning()) {
+            serverWorld.setTimeOfDay(12800);
+        } else if (this.isNight() && world.getTimeOfDay() != 18000) {
             serverWorld.setTimeOfDay(18000);
         } else if (!this.isNight() && world.getTimeOfDay() != 6000) {
             serverWorld.setTimeOfDay(6000);

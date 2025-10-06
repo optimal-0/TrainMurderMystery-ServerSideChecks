@@ -44,7 +44,7 @@ public class MoodRenderer {
     @Environment(EnvType.CLIENT)
     public static void renderHud(@NotNull PlayerEntity player, TextRenderer textRenderer, DrawContext context, RenderTickCounter tickCounter) {
         GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(player.getWorld());
-        if (!gameWorldComponent.isRunning() || !TMMClient.isPlayerAliveAndInSurvival() || gameWorldComponent.isDiscoveryMode()) return;
+        if (!gameWorldComponent.isRunning() || !TMMClient.isPlayerAliveAndInSurvival() || gameWorldComponent.getGameMode() != GameWorldComponent.GameMode.MURDER) return;
         var component = PlayerMoodComponent.KEY.get(player);
         var oldMood = moodRender;
         moodRender = MathHelper.lerp(tickCounter.getTickDelta(true) / 8, moodRender, component.getMood());

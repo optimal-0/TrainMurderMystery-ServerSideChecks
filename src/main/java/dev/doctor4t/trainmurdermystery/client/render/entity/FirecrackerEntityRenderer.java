@@ -13,6 +13,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
+@SuppressWarnings("deprecation")
 public class FirecrackerEntityRenderer extends EntityRenderer<FirecrackerEntity> {
     private final ItemRenderer itemRenderer;
     private final float scale;

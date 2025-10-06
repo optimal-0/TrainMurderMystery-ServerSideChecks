@@ -45,9 +45,10 @@ public class TMM implements ModInitializer {
             GiveRoomKeyCommand.register(dispatcher);
             SetTrainSpeedCommand.register(dispatcher);
             StartCommand.register(dispatcher);
-            StartDiscoveryCommand.register(dispatcher);
-            StopCommand.register(dispatcher);
             TestStartGameCommand.register(dispatcher);
+            StartDiscoveryCommand.register(dispatcher);
+            StartLooseEndsCommand.register(dispatcher);
+            StopCommand.register(dispatcher);
             ForceStop.register(dispatcher);
             ResetWeightsCommand.register(dispatcher);
             ToggleSnowCommand.register(dispatcher);
@@ -168,6 +169,7 @@ public class TMM implements ModInitializer {
 
 // Second round of tweaks
 // TORECORD: Nightvis with instinct for killers
+// TORECORD: Increase knife cooldown
 // TORECORD: Adjust item prices
 // TORECORD: 5s cooldown on the crowbar
 // TORECORD: Fix role weighting
@@ -178,7 +180,7 @@ public class TMM implements ModInitializer {
 // - Everyone spawns on the train with nothing but a crowbar
 // - One minute into the game, everyone is given a derringer (one bullet) and a bat
 // - Last person standing wins
-// - Red sky
+// - Dusk
 
 // POST VIDEO
 // TORECORD: Ability to customize time of day for supporters + snow density

@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.util.AlwaysVisibleFrustum;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
@@ -40,7 +41,7 @@ public abstract class WorldRendererMixin {
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V"))
     public void tmm$disableSky(WorldRenderer instance, Matrix4f matrix4f, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean thickFog, Runnable fogCallback, Operation<Void> original) {
-        if (!TMMClient.isTrainMoving()) original.call(instance, matrix4f, projectionMatrix, tickDelta, camera, thickFog, fogCallback);
+        if (!TMMClient.isTrainMoving() || TMMClient.gameComponent.getGameMode() == GameWorldComponent.GameMode.LOOSE_ENDS) original.call(instance, matrix4f, projectionMatrix, tickDelta, camera, thickFog, fogCallback);
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/BackgroundRenderer;applyFog(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/BackgroundRenderer$FogType;FZF)V"))
@@ -53,7 +54,7 @@ public abstract class WorldRendererMixin {
     }
 
     @Unique
-    private static void tmm$doFog(int fogStart, int fogEnd) {
+    private static void tmm$doFog(float fogStart, float fogEnd) {
         var fogData = new BackgroundRenderer.FogData(BackgroundRenderer.FogType.FOG_SKY);
 
         fogData.fogStart = fogStart;
@@ -118,7 +119,7 @@ public abstract class WorldRendererMixin {
                             finalZ = v3;
                         }
 
-                        if (Math.abs(finalX) < 160) {
+                        if (Math.abs(finalX) < (TMMClient.gameComponent.getGameMode() == GameWorldComponent.GameMode.LOOSE_ENDS ? 320 : 160)) {
                             glUniform.set(
                                     finalX,
                                     finalY,

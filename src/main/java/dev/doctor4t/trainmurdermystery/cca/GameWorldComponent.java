@@ -28,7 +28,10 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
     public enum GameStatus {
         INACTIVE, STARTING, ACTIVE, STOPPING
     }
-    private boolean discoveryMode = false;
+    private GameMode gameMode = GameMode.MURDER;
+    public enum GameMode {
+        MURDER, DISCOVERY, LOOSE_ENDS
+    }
 
     private GameStatus gameStatus = GameStatus.INACTIVE;
     private int fade = 0;
@@ -140,18 +143,18 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
         this.sync();
     }
 
-    public boolean isDiscoveryMode() {
-        return discoveryMode;
+    public GameMode getGameMode() {
+        return gameMode;
     }
 
-    public void setDiscoveryMode(boolean discoveryMode) {
-        this.discoveryMode = discoveryMode;
+    public void setGameMode(GameMode discoveryMode) {
+        this.gameMode = discoveryMode;
         this.sync();
     }
 
     @Override
     public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        this.setDiscoveryMode(nbtCompound.getBoolean("DiscoveryMode"));
+        this.setGameMode(GameMode.valueOf(nbtCompound.getString("GameMode")));
 
         this.setGameStatus(GameStatus.valueOf(nbtCompound.getString("GameStatus")));
 
@@ -172,7 +175,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
 
     @Override
     public void writeToNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        nbtCompound.putBoolean("DiscoveryMode", discoveryMode);
+        nbtCompound.putString("GameMode", gameMode.name());
 
         nbtCompound.putString("GameStatus", this.gameStatus.toString());
 
@@ -256,7 +259,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
                 // check killer win condition: kill count reached
                 GameFunctions.WinStatus winStatus = GameFunctions.WinStatus.NONE;
 
-                if (!discoveryMode) {
+                if (gameMode == GameMode.MURDER) {
                     // check killer win condition (kill count reached)
                     if (!civilianAlive) {
                         winStatus = GameFunctions.WinStatus.KILLERS;
@@ -277,7 +280,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ClientTickingCom
                 if (winStatus == GameFunctions.WinStatus.NONE && !GameTimeComponent.KEY.get(serverWorld).hasTime()) winStatus = GameFunctions.WinStatus.TIME;
 
                 // stop game if ran out of time on discovery mode
-                if (discoveryMode && winStatus == GameFunctions.WinStatus.TIME) GameFunctions.stopGame(serverWorld);
+                if (gameMode == GameMode.DISCOVERY && winStatus == GameFunctions.WinStatus.TIME) GameFunctions.stopGame(serverWorld);
 
                 // game end on win and display
                 if (winStatus != GameFunctions.WinStatus.NONE && this.gameStatus == GameStatus.ACTIVE) {

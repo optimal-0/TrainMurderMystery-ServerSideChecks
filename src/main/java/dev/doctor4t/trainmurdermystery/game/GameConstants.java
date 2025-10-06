@@ -28,8 +28,8 @@ public interface GameConstants {
     // Items
     Map<Item, Integer> ITEM_COOLDOWNS = new HashMap<>();
     static void init() {
-        ITEM_COOLDOWNS.put(TMMItems.KNIFE, getInTicks(1, 0));
-        ITEM_COOLDOWNS.put(TMMItems.REVOLVER, getInTicks(0, 5));
+        ITEM_COOLDOWNS.put(TMMItems.KNIFE, getInTicks(2, 30));
+        ITEM_COOLDOWNS.put(TMMItems.REVOLVER, getInTicks(0, 10));
         ITEM_COOLDOWNS.put(TMMItems.DERRINGER, getInTicks(0, 1));
         ITEM_COOLDOWNS.put(TMMItems.GRENADE, getInTicks(5, 0));
         ITEM_COOLDOWNS.put(TMMItems.LOCKPICK, getInTicks(3, 0));

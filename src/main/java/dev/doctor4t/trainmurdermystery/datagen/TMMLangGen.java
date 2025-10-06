@@ -81,7 +81,7 @@ public class TMMLangGen extends FabricLanguageProvider {
         builder.add("tip.door.requires_key", "This door is locked and requires a key to be opened.");
         builder.add("tip.door.requires_different_key", "This door is locked and requires a different key to be opened.");
         builder.add("tip.door.jammed", "This door is jammed and cannot be opened at the moment!");
-        builder.add("tip.derringer.used", "Used, cannot be shot anymore, get a bat kill for another chance!");
+        builder.add("tip.derringer.used", "Used: cannot be shot anymore, get a kill for another chance!");
 
         builder.add("tip.cooldown", "On cooldown: %s");
         builder.add(TextUtils.getItemTranslationKey(TMMItems.KNIFE) + ".tooltip", "Right-click, hold for a second and get close to your victim\nAfter a kill, cannot be used for 1 minute\nAttack to knock back / push a player (no cooldown)");

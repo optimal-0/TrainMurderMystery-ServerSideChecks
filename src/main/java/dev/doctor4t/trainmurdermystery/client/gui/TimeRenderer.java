@@ -18,7 +18,7 @@ public class TimeRenderer {
 
     public static void renderHud(TextRenderer renderer, @NotNull ClientPlayerEntity player, @NotNull DrawContext context, float delta) {
         GameWorldComponent gameWorldComponent = TMMComponents.GAME.get(player.getWorld());
-        if (gameWorldComponent.isRunning() && (gameWorldComponent.isDiscoveryMode() || gameWorldComponent.isKiller(player) || GameFunctions.isPlayerSpectatingOrCreative(player))) {
+        if (gameWorldComponent.isRunning() && (gameWorldComponent.getGameMode() == GameWorldComponent.GameMode.DISCOVERY || gameWorldComponent.isKiller(player) || GameFunctions.isPlayerSpectatingOrCreative(player))) {
             var time = GameTimeComponent.KEY.get(player.getWorld()).getTime();
             if (Math.abs(view.getTarget() - time) > 10) offsetDelta = time > view.getTarget() ? .6f : -.6f;
             if (time < GameConstants.getInTicks(1, 0)) {

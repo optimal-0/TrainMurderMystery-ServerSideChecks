@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 @Mixin(EntityRenderDispatcher.class)
 public class EntityRendererDispatchMixin {
     @Unique

@@ -2,8 +2,8 @@ package dev.doctor4t.trainmurdermystery.client.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.GameRoundEndComponent;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
@@ -13,10 +13,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.*;
 import net.minecraft.client.util.SkinTextures;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +53,7 @@ public class RoundTextRenderer {
             context.getMatrices().pop();
         }
         var game = TMMComponents.GAME.get(player.getWorld());
-        if (endTime > 0 && endTime < END_DURATION - (GameConstants.FADE_TIME * 2) && !game.isRunning() && !game.isDiscoveryMode()) {
+        if (endTime > 0 && endTime < END_DURATION - (GameConstants.FADE_TIME * 2) && !game.isRunning() && game.getGameMode() == GameWorldComponent.GameMode.MURDER) {
             var roundEnd = GameRoundEndComponent.KEY.get(player.getWorld());
             if (roundEnd.getWinStatus() == GameFunctions.WinStatus.NONE) return;
             var endText = role.getEndText(roundEnd.getWinStatus());
@@ -125,7 +123,7 @@ public class RoundTextRenderer {
     }
 
     public static void tick() {
-        if (MinecraftClient.getInstance().world != null && !TMMComponents.GAME.get(MinecraftClient.getInstance().world).isDiscoveryMode()) {
+        if (MinecraftClient.getInstance().world != null && TMMComponents.GAME.get(MinecraftClient.getInstance().world).getGameMode() == GameWorldComponent.GameMode.MURDER) {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (welcomeTime > 0) {
                 switch (welcomeTime) {
