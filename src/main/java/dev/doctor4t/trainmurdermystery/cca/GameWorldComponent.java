@@ -193,7 +193,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
     }
 
     public void queueTrainReset() {
-        ticksUntilNextResetAttempt = 20;
+        ticksUntilNextResetAttempt = 5;
     }
 
     public int getPsychosActive() {
@@ -301,7 +301,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
     public void serverTick() {
         tickCommon();
 
-        if (ticksUntilNextResetAttempt-- == 0) {
+        if (ticksUntilNextResetAttempt-- <= 0) {
             if (GameFunctions.tryResetTrain((ServerWorld) this.world)) {
                 ticksUntilNextResetAttempt = 5;
             }
