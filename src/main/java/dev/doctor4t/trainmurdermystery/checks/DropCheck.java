@@ -23,7 +23,6 @@ public class DropCheck {
         for (World world : server.getWorlds()) {
             for (ItemEntity itemEntity : world.getEntitiesByClass(ItemEntity.class, worldBox, e -> true)) {
 
-                // If the item was dropped by a player (Q-drop)
                 Entity owner = itemEntity.getOwner();
                 if (owner instanceof PlayerEntity playerOwner) {
                     if (playerOwner instanceof ServerPlayerEntity serverPlayer &&
@@ -31,7 +30,6 @@ public class DropCheck {
                         break;
                     }
 
-                    // Otherwise, return the item to the player's inventory
                     ItemStack stack = itemEntity.getStack();
                     if (!stack.isEmpty()) {
                         boolean inserted = playerOwner.getInventory().insertStack(stack);
